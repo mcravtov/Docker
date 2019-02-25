@@ -1,0 +1,43 @@
+version: '2'
+services:
+    nginx:
+        build: ./nginx
+        image: dev-nginx:prod
+        container_name: dev-nginx
+        hostname: nginx
+        restart: unless-stopped
+        ports:
+            - "80:80"
+            - "443:443"
+        depends_on:
+            - "php"
+        volumes:
+            - ../../:/var/www/dev
+            - ./ssl-certs:/etc/ssl/ssl-certs
+    php:
+        build: ./php
+        image: dev-php:prod
+        container_name: dev-php
+        hostname: php
+        restart: unless-stopped
+        depends_on:
+            - "postgres"
+        volumes:
+            - ../../:/var/www/dev
+    postgres:
+        build: ./db
+        image: dev-db:prod
+        container_name: dev-db
+        hostname: postgres
+        restart: unless-stopped
+        image: postgres:11-alpine
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_DB: dev
+            POSTGRES_USER: dev
+            POSTGRES_PASSWORD: 'uls_server_/*-+x'
+
+volumes:
+    postgres_data:
+        driver: "local"
